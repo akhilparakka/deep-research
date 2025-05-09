@@ -5,9 +5,10 @@ description = "Deep research using LLM"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "langchain-openai",
-    "langgraph",
-    "python-dotenv"
+    "langchain-community>=0.3.23",
+    "langchain-openai>=0.3.16",
+    "langgraph>=0.4.3",
+    "python-dotenv>=1.1.0",
 ]
 
 [tool.setuptools]
