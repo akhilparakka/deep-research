@@ -4,11 +4,14 @@ from src.graph.nodes import (
     planner_node,
     background_investigation_node,
     reporter_node,
+    human_feedback_node,
+    research_team_node,
 )
 from src.graph.types import State
+from langgraph.checkpoint.memory import MemorySaver
 
 
-def _build_graph():
+def build_graph():
     builder = StateGraph(State)
 
     builder.add_edge(START, "coordinator")
@@ -16,9 +19,13 @@ def _build_graph():
     builder.add_node("background_investigator", background_investigation_node)
     builder.add_node("planner", planner_node)
     builder.add_node("reporter", reporter_node)
+    builder.add_node("research_team", research_team_node)
+    builder.add_node("human_feedback", human_feedback_node)
     builder.add_edge("coordinator", END)
 
-    return builder.compile()
+    memory = MemorySaver()
+
+    return builder.compile(checkpointer=memory)
 
 
-graph = _build_graph()
+graph = build_graph()

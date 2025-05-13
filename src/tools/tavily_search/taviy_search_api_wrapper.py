@@ -113,5 +113,5 @@ class EnhancedTavilySearchAPIWrapper(OriginalTavilySearchAPIWrapper):
 
 if __name__ == "__main__":
     wrapper = EnhancedTavilySearchAPIWrapper()
-    results = wrapper.raw_results("cute panda", include_images=True)
+    results = wrapper.raw_results("cute panda", include_images=False)
     print(json.dumps(results, indent=2, ensure_ascii=False))

@@ -1,5 +1,5 @@
-from .builder import _build_graph
+from .builder import build_graph
 
 __all__ = [
-    "_build_graph",
+    "build_graph",
 ]

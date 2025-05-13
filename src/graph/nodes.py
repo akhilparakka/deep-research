@@ -146,6 +146,72 @@ def coordinator_node(
     )
 
 
+def human_feedback_node(
+    state,
+) -> Command[Literal["planner", "research_team", "reporter", "__end__"]]:
+    current_plan = state.get("current_plan", "")
+    auto_accepted_plan = state.get("auto_accepted_plan", False)
+    if not auto_accepted_plan:
+        feedback = interrupt("Please Review the Plan.")
+
+        if feedback and str(feedback).upper().startswith("[EDIT_PLAN]"):
+            return Command(
+                update={
+                    "messages": [
+                        HumanMessage(content=feedback, name="feedback"),
+                    ],
+                },
+                goto="planner",
+            )
+        elif feedback and str(feedback).upper().startswith("[ACCEPTED]"):
+            logger.info("Plan is accepted by user.")
+        else:
+            raise TypeError(f"Interrupt value of {feedback} is not supported.")
+
+    plan_iterations = state["plan_iterations"] if state.get("plan_iterations", 0) else 0
+    goto = "research_team"
+    try:
+        current_plan = repair_json_output(current_plan)
+        plan_iterations += 1
+        new_plan = json.loads(current_plan)
+        if new_plan["has_enough_context"]:
+            goto = "reporter"
+    except json.JSONDecodeError:
+        logger.warning("Planner response is not a valid JSON")
+        if plan_iterations > 0:
+            return Command(goto="reporter")
+        else:
+            return Command(goto="__end__")
+
+    return Command(
+        update={
+            "current_plan": Plan.model_validate(new_plan),
+            "plan_iterations": plan_iterations,
+        },
+        goto=goto,
+    )
+
+
+def research_team_node(
+    state: State,
+) -> Command[Literal["planner"]]:
+    """Research team node that collaborates on tasks."""
+    logger.info("Research team is collaborating on tasks.")
+    current_plan = state.get("current_plan")
+    if not current_plan or not current_plan.steps:
+        return Command(goto="planner")
+    if all(step.execution_res for step in current_plan.steps):
+        return Command(goto="planner")
+    # for step in current_plan.steps:
+    #     if not step.execution_res:
+    #         break
+    # if step.step_type and step.step_type == StepType.RESEARCH:
+    #     return Command(goto="researcher")
+    # if step.step_type and step.step_type == StepType.PROCESSING:
+    #     return Command(goto="coder")
+    # return Command(goto="planner")
+
+
 def reporter_node(state: State):
     pass
     # """Reporter node that write a final report."""
@@ -157,7 +223,6 @@ def reporter_node(state: State):
     #             f"# Research Requirements\n\n## Task\n\n{current_plan.title}\n\n## Description\n\n{current_plan.thought}"
     #         )
     #     ],
-    #     "locale": state.get("locale", "en-US"),
     # }
     # invoke_messages = apply_prompt_template("reporter", input_)
     # observations = state.get("observations", [])

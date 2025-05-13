@@ -11,6 +11,7 @@ class State(MessagesState):
     observations: list[str] = []
     plan_iterations: int = 0
     current_plan: Plan | str = None
+    user_input: str = None
     final_report: str = ""
     auto_accepted_plan: bool = False
     enable_background_investigation: bool = True
