@@ -25,6 +25,7 @@ graph = build_graph()
 @app.post("/api/chat/stream")
 async def chat_stream(request: ChatRequest):
     thread_id = request.thread_id
+    print(thread_id, "Check thread Id")
     if thread_id == "__default__":
         thread_id = str(uuid4())
 
