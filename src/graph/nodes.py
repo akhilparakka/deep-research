@@ -140,7 +140,7 @@ def coordinator_node(
         logger.warning(
             "Coordinator response contains no tool calls. Terminating workflow execution."
         )
-        logger.debug(f"Coordinator response: {response}")
+        logger.info(f"Coordinator response: {response}")
 
     return Command(
         goto=goto,
