@@ -26,7 +26,9 @@ def handoff_to_planner(
     return
 
 
-def planner_node(state: State, config: RunnableConfig):
+def planner_node(
+    state: State, config: RunnableConfig
+) -> Command[Literal["reporter", "human_feedback", "__end__"]]:
     configurable = Configuration.from_runnable_config(config)
     plan_iterations = state["plan_iterations"] if state.get("plan_iterations", 0) else 0
     messages = apply_prompt_template("planner", state, configurable)
@@ -140,7 +142,7 @@ def coordinator_node(
         logger.warning(
             "Coordinator response contains no tool calls. Terminating workflow execution."
         )
-        logger.debug(f"Coordinator response: {response}")
+        logger.info(f"Coordinator response: {response}")
 
     return Command(
         goto=goto,
@@ -197,7 +199,7 @@ def human_feedback_node(
 
 def research_team_node(
     state: State,
-) -> Command[Literal["planner"]]:
+) -> Command[Literal["planner", "researcher", "coder"]]:
     """Research team node that collaborates on tasks."""
     logger.info("Research team is collaborating on tasks.")
     current_plan = state.get("current_plan")
